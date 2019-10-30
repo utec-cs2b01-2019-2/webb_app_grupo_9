@@ -1,17 +1,7 @@
-from flask import Flask ,request ,make_response,redirect,render_template ,url_for,flash,session,escape
-from flask_sqlalchemy import SQLAlchemy
+from flask import request ,make_response,redirect,render_template ,url_for,flash,session,escape
+from app import app,db
 from werkzeug.security import generate_password_hash,check_password_hash
-from models import Users
-import sqlite3
-import os
-
-
-
-dbdir="sqlite:///" + os.path.abspath(os.getcwd()) + "/database.db"
-
-app = Flask(__name__)
-db=SQLAlchemy(app)
-app.config["SQLALCHEMY_DATABASE_URI"]=dbdir
+from app.schemas.models import Users
 
 @app.route('/sign_up',methods=['GET','POST'])
 def sign_up():
@@ -92,9 +82,3 @@ def Eliminar_tarea():
         return render_template('blog_1.html')
     flash('Debes loggearte primero')
     return render_template('login.html')
-
-app.secret_key='..'
-
-if __name__ == '__main__':
-    db.create_all()
-    app.run(debug=True,port=8000)
