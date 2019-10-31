@@ -13,15 +13,14 @@ app.config.from_object("config.DevelopmentConfig")
 db = SQLAlchemy(app)
 
 def allowed_file(filename):
-
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS #
 
 def get_profile_picture(email):
     size = 512
+    utec = "https://2.bp.blogspot.com/-FFVPfgAwfW4/Wp3BRQ2NiSI/AAAAAAAAK80/1NpK6c_nAawu5cjCzi6dn_ETT0eIGrYiQCLcBGAs/s1600/UTEC.png" + hashlib.md5(email.encode("utf-8").lower()).hexdigest() + "?"
 
-    gravatar_url = "https://2.bp.blogspot.com/-FFVPfgAwfW4/Wp3BRQ2NiSI/AAAAAAAAK80/1NpK6c_nAawu5cjCzi6dn_ETT0eIGrYiQCLcBGAs/s1600/UTEC.png" + hashlib.md5(email.encode("utf-8").lower()).hexdigest() + "?"
+    return utec
 
-    return gravatar_url
 
 class Base(db.Model):
     __abstract__ = True
@@ -68,7 +67,7 @@ def signup():
             email = Users.query.filter_by(email=request.form["email"].lower()).first()
 
             if username or email:
-                flash("Usernames and emails must be unique.", "alert-warning")
+                flash("Ese nombre o email ya esta en uso", "alert-warning")
 
                 return redirect(request.url)
             hashed_pw = generate_password_hash(request.form["password"], method="sha256")
@@ -81,7 +80,7 @@ def signup():
             return redirect(url_for("login"))
 
         return render_template("signup.html")
-    flash("You're already logged in.", "alert-primary")
+    flash("Ya estas registrado", "alert-primary")
 
     return redirect(url_for("home"))
 
@@ -89,9 +88,7 @@ def signup():
 def login():
     if not g.user:
         if request.method == "POST":
-            user = Users.query.filter_by(username=request.form["username"]\
-                        .lower()).first()
-
+            user = Users.query.filter_by(username=request.form["username"].lower()).first()
             if user and check_password_hash(user.password, request.form["password"]):
                 session["username"] = user.username
                 flash("Ya se ha autentificado", "alert-success")
@@ -123,7 +120,7 @@ def edit_profile():
         user.about_me = request.form["about"]
         db.session.commit()
 
-        flash("Changes has been saved successfully!", "alert-success")
+        flash("Los cambios han sido guardados exitosamente", "alert-success")
         return redirect(url_for("profile", username=g.user))
 
     return render_template("edit_profile.html", user=user)
@@ -133,11 +130,11 @@ def home():
     if g.user:
         if request.method == "POST":
             if "file" not in request.files:
-                flash("No file part.", "alert-danger")
+                flash("ninguna parte del archivo", "alert-danger")
                 return redirect(request.url)
             file = request.files["file"]
             if file.filename == "":
-                flash("No selected file.", "alert-warning")
+                flash("No hay archivo", "alert-warning")
                 return redirect(request.url)
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
@@ -149,7 +146,7 @@ def home():
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                 return redirect(url_for("get_files"))
         return render_template("home.html")
-    flash("You must be logged in.", "alert-warning")
+    flash("Debes registrarte", "alert-warning")
 
     return redirect(url_for("login"))
 
@@ -172,7 +169,7 @@ def get_files():
         files = []
         return render_template("my_files.html", files=files)
 
-    flash("You must be logged in.", "alert-warning")
+    flash("Debes registrarte", "alert-warning")
 
     return redirect(url_for("login"))
 
@@ -200,4 +197,4 @@ def page_not_found(error):
 
 if __name__ == "__main__":
     db.create_all()
-    app.run(port=8080)
+    app.run()
